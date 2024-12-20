@@ -76,7 +76,6 @@ class KnowledgeDB(DBConnect):
             },
             {
                 '$project': {
-                    '_id': 0,
                     'docGuid': 1,
                     'chunkGuid': 1,
                     'subject': 1,

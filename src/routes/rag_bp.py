@@ -11,6 +11,7 @@ def welcome():
 
 rag_bp.route('')(welcome)
 
-rag_bp.route('/get_knowledge', methods=['GET'])(get_knowledge)
-rag_bp.route('/add_knowledge', methods=['POST'])(add_knowledge)
-rag_bp.route('/remove_knowledge', methods=['DELETE'])(remove_knowledge)
+rag_bp.route('/get', methods=['GET'])(get_knowledge)
+rag_bp.route('/add', methods=['POST'])(add_knowledge)
+rag_bp.route('/remove', methods=['DELETE'])(remove_knowledge)
+rag_bp.route('/query', methods=['PUT'])(add_knowledge)
