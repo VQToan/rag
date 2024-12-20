@@ -85,11 +85,16 @@ def get_knowledge():
     """
     try:
         top, retrieval_text, threshold = validate()
-        prompt = (f'You are a chatbot. You should be able to answer questions and provide information to users.The answer should be relevant and shortest possible.\n'
-                  f'Knowledge queried is: \n'
-                  f'Q: ' + retrieval_text + '\n'
-                                            f'A: {KNOWLEDGE_DB.query(retrieval_text)}'
-                  )
+        knowledge = KNOWLEDGE_DB.query(retrieval_text)
+        knowledge_context = ''
+        for idx, k in enumerate(knowledge):
+            knowledge_context += f'#Chunk {idx + 1}:\n ##Summary: {k["summary"]}\n##Content: {k["content"]}\n\n'
+        prompt = (
+                f'You are a chatbot. You should be able to answer questions and provide information to users.The answer should be relevant and shortest possible.\n'
+                f'Knowledge queried is: \n'
+                f'Q: ' + retrieval_text + '\n'
+                                          f'A: {knowledge_context}'
+        )
         # Get the knowledge from the database
         client = GeminiClient(
             instruction=prompt,
