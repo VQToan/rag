@@ -8,4 +8,4 @@ RUN pip install -r requirements.txt
 RUN apt-get update
 COPY . .
 EXPOSE 80
-CMD ["waitress-serve","--port=80","--threads=8","--url-prefix=/api/v1/tripgo-tour","--call","run:run_app"]
+CMD ["waitress-serve","--port=80","--threads=8","--url-prefix=/api/v1/rag","--call","run:run_app"]

@@ -1,0 +1,11 @@
+include:
+  - project: ebk-travel/devops
+    ref: master
+    file: /templates/auto-devops-default.yml
+job test:
+  stage: test
+  tags:
+    - linux
+  script:
+    - echo 1
+
