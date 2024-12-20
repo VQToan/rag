@@ -1,0 +1,9 @@
+.venv
+.env
+test
+.idea
+.vscode
+__pycache__
+*/__pycache__/
+temp
+/models
