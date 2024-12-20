@@ -1,0 +1,21 @@
+[
+  {
+    "name": "get_knowledge",
+    "description": "Retrieve knowledge from the knowledge base",
+    "parameters": {
+      "type_": "OBJECT",
+      "properties": {
+        "retrieval_texts": {
+          "type_": "ARRAY",
+          "items": {
+            "type_": "STRING"
+          },
+          "description": "List of retrieval texts"
+        }
+      },
+      "required": [
+        "retrieval_texts"
+      ]
+    }
+  }
+]
