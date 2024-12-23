@@ -46,7 +46,7 @@ class KnowledgeDB(DBConnect):
             },
             {
                 '$match': {
-                    'score': {'$gte': 0.7}
+                    'score': {'$gte': 0.6}
                 }
             },
             {
@@ -57,7 +57,7 @@ class KnowledgeDB(DBConnect):
         res = list(res)
         return res, embedding
 
-    def query(self, text, top=20, threshold=0.7):
+    def query(self, text, top=10, threshold=0.7):
         categories, embedding = self.query_category(text)
         category_guids = [category['docGuid'] for category in categories]
         query = [
