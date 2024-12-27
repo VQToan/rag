@@ -20,7 +20,7 @@ class ModelEmbedding:
         self.tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
         self.session = ort.InferenceSession(path_model)
 
-    def encode(self, texts):
+    def encode(self, texts, type=None):
         encoded_input = self.tokenizer(texts, padding=True, truncation=True, return_tensors='np')
         model_output = self.session.run(None, {
             'input_ids': encoded_input['input_ids'],
@@ -31,9 +31,22 @@ class ModelEmbedding:
         return sentence_embeddings
 
 
+class LLMEmbedding:
+    def __init__(self):
+        pass
+
+    def encode(self, texts, type):
+        from src.utils.gemini import GeminiEmbedding
+        if type == 'doc':
+            embeddings = GeminiEmbedding(texts, type='RETRIEVAL_DOCUMENT', dim=384)
+        else:
+            embeddings = GeminiEmbedding(texts, type='RETRIEVAL_QUERY', dim=384)
+        return np.array(embeddings)
+
+
 class VietnameseChunker:
     def __init__(self, chunk_size=300):
-        self.model = ModelEmbedding()
+        self.model = LLMEmbedding()
         self.chunk_size = chunk_size
 
     def chunk(self, text):
@@ -41,7 +54,7 @@ class VietnameseChunker:
         if not sentences:
             return []
 
-        embeddings = self.model.encode(sentences)
+        embeddings = self.model.encode(sentences, type='doc')
 
         chunks = []
         start = 0
@@ -86,5 +99,6 @@ class VietnameseChunker:
         sentences = re.split(r'(?<=[.!?])\s+', text)
         return [s.strip() for s in sentences if s.strip()]
 
-    def embed(self, texts):
-        return self.model.encode(texts)
+    def embed(self, texts, **kwargs):
+        type = kwargs.get('type', None)
+        return self.model.encode(texts, type=type)

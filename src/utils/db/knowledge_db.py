@@ -21,7 +21,7 @@ class KnowledgeDB(DBConnect):
 
     def query_category(self, text):
         from src.config import VIET_CHUNKER
-        embedding = VIET_CHUNKER.embed([text])[0].tolist()
+        embedding = VIET_CHUNKER.embed([text], type='query')[0].tolist()
         query = [
             {
                 '$vectorSearch': {

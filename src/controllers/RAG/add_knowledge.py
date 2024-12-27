@@ -81,7 +81,7 @@ def add_knowledge():
             {
                 'subject': subject,
                 'summary': summary,
-                'embedding': VIET_CHUNKER.embed([content])[0].tolist()
+                'embedding': VIET_CHUNKER.embed([content], type='doc')[0].tolist()
             })
         chunks = chunk_text(content)
         embeddings = embedding_text(chunks)

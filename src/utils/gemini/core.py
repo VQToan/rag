@@ -14,12 +14,12 @@ load_dotenv()
 genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
 
 
-def GeminiEmbedding(text, type='RETRIEVAL_QUERY', ):
+def GeminiEmbedding(text, type='RETRIEVAL_QUERY', dim=768):
     query_emb = genai.embed_content(
         model="models/text-embedding-004",
         content=text,
         task_type=type,
-        output_dimensionality=768,
+        output_dimensionality=dim,
     )
     return query_emb['embedding']
 
