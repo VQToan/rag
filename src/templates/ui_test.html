@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG System UI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+            gap: 20px;
+        }
+
+        .main-container {
+            flex: 3;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .knowledge-container {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 40px);
+        }
+
+        .question-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .answers-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .answer-box {
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .answer-box h3 {
+            margin-top: 0;
+            color: #2196F3;
+            border-bottom: 2px solid #2196F3;
+            padding-bottom: 10px;
+        }
+
+        textarea {
+            width: calc(100% - 24px);
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            resize: none;
+            font-size: 14px;
+            line-height: 1.5;
+            min-height: 100px;
+        }
+
+        .question-textarea {
+            height: 100px;
+        }
+
+        .knowledge-textarea {
+            height: 150px;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .delete-btn {
+            background-color: #f44336;
+        }
+
+        .delete-btn:hover {
+            background-color: #da190b;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #666;
+            transition: all 0.2s ease;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .icon-btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            background: currentColor;
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.5);
+            transition: all 0.2s ease;
+        }
+
+        .icon-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .icon-btn:hover::after {
+            opacity: 0.08;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .icon-btn i {
+            position: relative;
+            z-index: 1;
+        }
+
+        .icon-btn.edit {
+            color: #2196F3;
+        }
+
+        .icon-btn.delete {
+            color: #f44336;
+        }
+
+        .icon-btn.edit:hover {
+            color: #1976D2;
+        }
+
+        .icon-btn.delete:hover {
+            color: #D32F2F;
+        }
+
+        h2, h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .knowledge-list {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            flex-grow: 1;
+            overflow-y: auto;
+            background-color: #fff;
+            padding: 15px;
+            margin-top: 10px;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            margin-bottom: 15px;
+        }
+
+        .knowledge-item {
+            padding: 12px 15px;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            position: relative;
+            padding-left: 40px;
+            padding-right: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .knowledge-item:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border-color: #d0d0d0;
+            background-color: #ffffff;
+        }
+
+        .knowledge-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .knowledge-text {
+            flex: 1;
+            margin-right: 15px;
+            line-height: 1.4;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: calc(100% - 50px);
+            color: #2c3e50;
+        }
+
+        .knowledge-list:empty::after {
+            content: 'No knowledge items yet. Add some using the form above.';
+            display: block;
+            text-align: center;
+            padding: 30px 20px;
+            color: #94a3b8;
+            font-style: italic;
+            font-size: 0.95em;
+        }
+
+        .knowledge-actions {
+            display: flex;
+            gap: 10px;
+            margin-left: 10px;
+        }
+
+        .add-knowledge-section {
+            margin-bottom: 20px;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 50%;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal textarea {
+            min-height: 150px;
+        }
+
+        .close {
+            position: absolute;
+            right: 10px;
+            top: 5px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .item-number {
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: #666;
+            color: white;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            z-index: 1;
+        }
+
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .success-message {
+            color: #4CAF50;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .error-message {
+            color: #f44336;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .answer-content {
+            min-height: 100px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            word-break: break-word;
+        }
+
+        .subject-select, .summary-input {
+            width: calc(100% - 24px);
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .subject-select {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E');
+            background-repeat: no-repeat;
+            background-position: right 12px top 50%;
+            background-size: 12px auto;
+        }
+
+        .answer-content {
+            min-height: 100px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            word-break: break-word;
+        }
+
+        /* Thêm các styles sau để định dạng nội dung Markdown */
+        .answer-content h1, .answer-content h2, .answer-content h3,
+        .answer-content h4, .answer-content h5, .answer-content h6 {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .answer-content p {
+            margin-bottom: 10px;
+        }
+
+        .answer-content ul, .answer-content ol {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .answer-content code {
+            background-color: #f0f0f0;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        .answer-content pre {
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+
+        .answer-content blockquote {
+            border-left: 4px solid #ccc;
+            margin-left: 0;
+            padding-left: 10px;
+            color: #666;
+        }
+
+        .answer-content table {
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+
+        .answer-content th, .answer-content td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+
+        .answer-content img {
+            max-width: 100%;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+<div class="main-container">
+    <div class="question-section">
+        <h2>Question Input</h2>
+        <textarea class="question-textarea" placeholder="Enter your question here..." id="questionInput"></textarea>
+        <button onclick="submitQuestion()">Submit Question</button>
+    </div>
+
+    <div class="answers-section">
+        <div class="answer-box">
+            <h3>RAG w Gemini Answer</h3>
+            <div class="answer-content" id="ragGeminiAnswer">
+                The answer from RAG + Gemini will appear here...
+            </div>
+        </div>
+
+        <div class="answer-box">
+            <h3>RAG w GPT Answer</h3>
+            <div class="answer-content" id="gptGeminiAnswer">
+                The answer from RAG + GPT will appear here...
+            </div>
+        </div>
+
+        <div class="answer-box">
+            <h3>GPT Only Answer</h3>
+            <div class="answer-content" id="gptOnlyAnswer">
+                The answer from GPT only will appear here...
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="knowledge-container">
+    <h2>Knowledge Base</h2>
+    <div class="add-knowledge-section">
+        <select id="subjectSelect" class="subject-select">
+            <option value="">Select a subject</option>
+            <option value="news">News</option>
+        </select>
+        <input type="text" id="summaryInput" class="summary-input" placeholder="Enter a summary...">
+        <textarea class="knowledge-textarea" id="newKnowledge"
+                  placeholder="Enter new knowledge to add to the database..." rows="6"></textarea>
+        <button onclick="addKnowledge()">Add Knowledge</button>
+        <div class="success-message" id="successMessage">Operation completed successfully!</div>
+        <div class="error-message" id="errorMessage">An error occurred. Please try again.</div>
+    </div>
+
+    <div class="knowledge-list" id="knowledgeList">
+        <!-- Knowledge items will be added here -->
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmModal" class="modal">
+    <div class="modal-content">
+        <h3>Confirm Delete</h3>
+        <p>Are you sure you want to delete this knowledge item?</p>
+        <button onclick="confirmDelete()">Yes, Delete</button>
+        <button onclick="closeConfirmModal()" style="background-color: #666;">Cancel</button>
+    </div>
+</div>
+
+<script>
+    let deleteIndex = -1;
+    base_url = 'http://localhost:5002/api/v1/rag';
+
+    function addKnowledge() {
+        const subject = document.getElementById('subjectSelect').value;
+        const summary = document.getElementById('summaryInput').value.trim();
+        const newKnowledgeText = document.getElementById('newKnowledge').value.trim();
+
+        if (subject && newKnowledgeText) {
+            showLoading();
+
+            // Prepare the data for the API call
+            const data = {
+                subject: subject,
+                summary: summary,
+                content: newKnowledgeText,
+
+            };
+
+            // Make the API call
+            fetch(base_url + '/add_all', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            }).then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+                .then(() => {
+                    renderKnowledgeList();
+                    showMessage('success');
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    showMessage('error');
+                })
+                .finally(() => {
+                    hideLoading();
+                });
+        } else {
+            showMessage('error');
+            alert('Please fill in all fields');
+        }
+    }
+
+    function showDeleteConfirm(docGuid) {
+        deleteIndex = docGuid;
+        document.getElementById('confirmModal').style.display = 'block';
+    }
+
+    function confirmDelete() {
+        if (deleteIndex !== -1) {
+            showLoading();
+            fetch(`${base_url}/remove?docGuid=${deleteIndex}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(() => {
+                    closeConfirmModal();
+                    renderKnowledgeList();
+                    showMessage('success');
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    showMessage('error');
+                })
+                .finally(() => {
+                    hideLoading();
+                });
+        }
+    }
+
+    function closeConfirmModal() {
+        document.getElementById('confirmModal').style.display = 'none';
+        deleteIndex = -1;
+    }
+
+    function renderKnowledgeList() {
+        const list = document.getElementById('knowledgeList');
+        list.innerHTML = '<div style="text-align: center; padding: 20px;">Loading...</div>';
+
+        fetch(base_url + '/list', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
+        }).then(response => response.json()).then(res => {
+            list.innerHTML = '';
+            console.log(res);
+            if (res.isOK === false) {
+                list.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">No knowledge items yet. Add some using the form above.</div>';
+                return;
+            }
+
+            res.result.forEach((knowledge, index) => {
+                const item = document.createElement('div');
+                item.className = 'knowledge-item';
+
+                const number = document.createElement('div');
+                number.className = 'item-number';
+                number.textContent = index + 1;
+
+                const text = document.createElement('div');
+                text.className = 'knowledge-text';
+                text.textContent = knowledge.summary; // Display only the summary
+
+                const actions = document.createElement('div');
+                actions.className = 'knowledge-actions';
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'icon-btn delete';
+                deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                deleteBtn.title = 'Delete';
+                deleteBtn.onclick = () => showDeleteConfirm(knowledge.docGuid); // Use docGuid here
+
+                actions.appendChild(deleteBtn);
+
+                item.appendChild(number);
+                item.appendChild(text);
+                item.appendChild(actions);
+                list.appendChild(item);
+            });
+        })
+            .catch(error => {
+                console.error('Error fetching knowledge list:', error);
+                list.innerHTML = '<div style="text-align: center; padding: 20px; color: red;">Error loading knowledge list. Please try again.</div>';
+            });
+    }
+
+    function showLoading() {
+        document.body.classList.add('loading');
+    }
+
+    function hideLoading() {
+        document.body.classList.remove('loading');
+    }
+
+    function showMessage(type) {
+        const successMsg = document.getElementById('successMessage');
+        const errorMsg = document.getElementById('errorMessage');
+
+        if (type === 'success') {
+            successMsg.style.display = 'block';
+            setTimeout(() => successMsg.style.display = 'none', 3000);
+        } else {
+            errorMsg.style.display = 'block';
+            setTimeout(() => errorMsg.style.display = 'none', 3000);
+        }
+    }
+
+    function submitQuestion() {
+        const question = document.getElementById('questionInput').value.trim();
+        if (question) {
+            showLoading();
+
+            // Function to make API call for each model type
+            const getAnswer = (type) => {
+                return fetch(`${base_url}/get`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        type: type,
+                        retrieval_text: question
+                    })
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => data.result)
+                    .catch(error => {
+                        console.error(`Error fetching ${type} answer:`, error);
+                        return `Error: Unable to fetch ${type} answer. Please try again.`;
+                    });
+            };
+
+            // Make API calls for all three types
+            Promise.all([
+                getAnswer('gemini'),
+                getAnswer('openai'),
+                getAnswer('openai_only')
+            ])
+                .then(([geminiAnswer, gptAnswer, gptOnlyAnswer]) => {
+                    // Use marked to convert Markdown to HTML
+                    document.getElementById('ragGeminiAnswer').innerHTML = marked.parse(geminiAnswer);
+                    document.getElementById('gptGeminiAnswer').innerHTML = marked.parse(gptAnswer);
+                    document.getElementById('gptOnlyAnswer').innerHTML = marked.parse(gptOnlyAnswer);
+                })
+                .finally(() => {
+                    hideLoading();
+                });
+        }
+    }
+
+    // Close modals when clicking outside
+    window.onclick = function (event) {
+        const confirmModal = document.getElementById('confirmModal');
+        if (event.target == confirmModal) {
+            closeConfirmModal();
+        }
+    }
+
+    // Initial render
+    renderKnowledgeList();
+</script>
+</body>
+</html>

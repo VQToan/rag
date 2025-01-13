@@ -19,16 +19,17 @@ class KnowledgeDB(DBConnect):
         self.db.update_many(query, {'$set': {'is_deleted': True}})
         self.category.update_many(query, {'$set': {'is_deleted': True}})
 
-    def query_category(self, text):
+    def query_category(self, text, provider='local'):
         from src.config import VIET_CHUNKER
-        embedding = VIET_CHUNKER.embed([text], type='query')[0].tolist()
+        embedding = VIET_CHUNKER.embed([text], type='query', provider=provider)[0].tolist()
         query = [
             {
                 '$vectorSearch': {
                     'index': 'embeddings_vector_search',
                     'path': 'embedding',
                     'filter': {
-                        'is_deleted': {'$ne': True}
+                        'is_deleted': {'$ne': True},
+                        'provider': provider
                     },
                     'queryVector': embedding,
                     'numCandidates': 20,
@@ -57,18 +58,20 @@ class KnowledgeDB(DBConnect):
         res = list(res)
         return res, embedding
 
-    def query(self, text, top=10, threshold=0.7):
-        categories, embedding = self.query_category(text)
-        category_guids = [category['docGuid'] for category in categories]
+    def query(self, text, provider='local', top=10, threshold=0.6):
+        categories, embedding = self.query_category(text, provider)
+        filter = {
+            'is_deleted': {'$ne': True},
+            'provider': provider,
+        }
+        if len(categories) > 0:
+            filter['docGuid'] = {'$in': [category['docGuid'] for category in categories]}
         query = [
             {
                 '$vectorSearch': {
                     'index': 'embeddings_vector_search',
                     'path': 'embedding',
-                    'filter': {
-                        'is_deleted': {'$ne': True},
-                        'docGuid': {'$in': category_guids}
-                    },
+                    'filter': filter,
                     'queryVector': embedding,
                     'numCandidates': top * 2,
                     'limit': top,
@@ -94,4 +97,27 @@ class KnowledgeDB(DBConnect):
             }
         ]
         res = self.query_agg(query)
+        return res
+
+    def get_list_category(self, subject):
+        match = {
+            'is_deleted': {'$ne': True},
+        }
+        if subject:
+            match['subject'] = {'$regex': subject, '$options': 'i'}
+        query = [
+            {
+                '$match': match
+            },
+            {
+                '$project': {
+                    '_id': 0,
+                    'docGuid': 1,
+                    'subject': 1,
+                    'summary': 1
+                }
+            }
+        ]
+        res = self.category.aggregate(query)
+        res = list(res)
         return res

@@ -5,6 +5,8 @@ import numpy as np
 import onnxruntime as ort
 from transformers import AutoTokenizer
 
+from src.utils.openAI.main import OpenAIClient
+
 path_model = os.path.join(os.path.dirname(__file__), 'all-MiniLM-L6-v2.onnx')
 
 
@@ -15,7 +17,7 @@ def mean_pooling(token_embeddings, attention_mask):
     return sum_embeddings / sum_mask
 
 
-class ModelEmbedding:
+class LocalEmbedding:
     def __init__(self):
         self.tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/all-MiniLM-L6-v2')
         self.session = ort.InferenceSession(path_model)
@@ -31,7 +33,7 @@ class ModelEmbedding:
         return sentence_embeddings
 
 
-class LLMEmbedding:
+class GeminiEmbedding:
     def __init__(self):
         pass
 
@@ -44,17 +46,30 @@ class LLMEmbedding:
         return np.array(embeddings)
 
 
+class OpenAIEmbedding:
+    def __init__(self):
+        self.client = OpenAIClient()
+
+    def encode(self, texts, type):
+        embeddings = self.client.encode(texts, type=type)
+        return np.array(embeddings)
+
+
 class VietnameseChunker:
     def __init__(self, chunk_size=300):
-        self.model = LLMEmbedding()
+        self.model = {
+            'local': LocalEmbedding(),
+            'gemini': GeminiEmbedding(),
+            'openai': OpenAIEmbedding()
+        }
         self.chunk_size = chunk_size
 
-    def chunk(self, text):
+    def chunk(self, text, provider='local'):
         sentences = self.split_into_sentences(text)
         if not sentences:
             return []
 
-        embeddings = self.model.encode(sentences, type='doc')
+        embeddings = self.model[provider].encode(sentences, type='doc')
 
         chunks = []
         start = 0
@@ -101,4 +116,5 @@ class VietnameseChunker:
 
     def embed(self, texts, **kwargs):
         type = kwargs.get('type', None)
-        return self.model.encode(texts, type=type)
+        provider = kwargs.get('provider', 'local')
+        return self.model[provider].encode(texts, type=type)

@@ -28,6 +28,11 @@ def query_knowledge():
             type: float
           description: The threshold of the knowledge to be retrieved
           required: true
+        - in: query
+          name: provider
+          schema:
+            type: string
+          description: The provider of the knowledge to be retrieved
     responses:
         200:
             description: Successfully get the knowledge from the database
@@ -91,8 +96,8 @@ def query_knowledge():
                                             example: "Knowledge not found"
     """
     try:
-        top, retrieval_text, threshold = validate_request()
-        response = KNOWLEDGE_DB.query(top, retrieval_text, threshold)
+        top, retrieval_text, threshold, provider = validate_request()
+        response = KNOWLEDGE_DB.query(retrieval_text, provider, top, threshold)
         return {
             'isOK': True,
             "result": response
@@ -116,7 +121,8 @@ def validate_request():
     """
     top = request.json.get('top', 10)
     retrieval_text = request.json.get('retrieval_text')
-    threshold = request.json.get('threshold', 0.8)
+    threshold = request.json.get('threshold', 0.6)
+    provider = request.json.get('provider', 'local')
     if retrieval_text is None or retrieval_text == '':
         raise Exception('Please provide all the required fields : retrieval_text')
-    return top, retrieval_text, threshold
+    return top, retrieval_text, threshold, provider
