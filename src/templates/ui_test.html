@@ -424,6 +424,12 @@
                 The answer from RAG + Gemini will appear here...
             </div>
         </div>
+        <div class="answer-box">
+            <h3>RAG Local w Gemini Answer</h3>
+            <div class="answer-content" id="ragLocalGeminiAnswer">
+                The answer from RAG Local + Gemini will appear here...
+            </div>
+        </div>
 
         <div class="answer-box">
             <h3>RAG w GPT Answer</h3>
@@ -669,13 +675,15 @@
             Promise.all([
                 getAnswer('gemini'),
                 getAnswer('openai'),
-                getAnswer('openai_only')
+                getAnswer('openai_only'),
+                getAnswer('local')
             ])
-                .then(([geminiAnswer, gptAnswer, gptOnlyAnswer]) => {
+                .then(([geminiAnswer, gptAnswer, gptOnlyAnswer, localAnswer]) => {
                     // Use marked to convert Markdown to HTML
                     document.getElementById('ragGeminiAnswer').innerHTML = marked.parse(geminiAnswer);
                     document.getElementById('gptGeminiAnswer').innerHTML = marked.parse(gptAnswer);
                     document.getElementById('gptOnlyAnswer').innerHTML = marked.parse(gptOnlyAnswer);
+                    document.getElementById('ragLocalGeminiAnswer').innerHTML = marked.parse(localAnswer);
                 })
                 .finally(() => {
                     hideLoading();

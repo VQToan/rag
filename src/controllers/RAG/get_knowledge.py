@@ -88,6 +88,8 @@ def get_knowledge():
             response = get_knowledge_by_openai(retrieval_text)
         elif type_rag == 'openai_only':
             response = get_knowledge_by_openai_no_rag(retrieval_text)
+        elif type_rag == 'local':
+            response = get_knowledge_by_local(retrieval_text)
         else:
             response = 'Invalid'
         return {
@@ -157,4 +159,22 @@ def get_knowledge_by_openai_no_rag(retrieval_text):
         instruction='',
     )
     response = client(retrieval_text)
+    return response
+
+def get_knowledge_by_local(retrieval_text):
+    knowledge = KNOWLEDGE_DB.query(retrieval_text, provider='local')
+    knowledge_context = ''
+    for idx, k in enumerate(knowledge):
+        knowledge_context += f'#Chunk {idx + 1}:\n ##Document title: {k["summary"]}\n##Chunk content: {k["content"]}\n\n'
+    prompt = (
+            f'You are a chatbot. You should be able to answer questions and provide information to users.The answer should be relevant and shortest possible.\n'
+            f'Knowledge queried is: \n'
+            f'Q: ' + retrieval_text + '\n'
+                                      f'A: {knowledge_context}'
+    )
+    client = GeminiClient(
+        instruction=prompt,
+    )
+    response = client(retrieval_text)
+
     return response
