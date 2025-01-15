@@ -13,7 +13,7 @@ def demo():
     return render_template('ui_test.html')
 
 
-rag_bp.route('/')(welcome)
+rag_bp.route('/')(demo)
 rag_bp.route('/liveness')(welcome)
 rag_bp.route('/get', methods=['POST'])(get_knowledge)
 rag_bp.route('/add', methods=['POST'])(add_knowledge)
@@ -21,4 +21,3 @@ rag_bp.route('/add_all', methods=['POST'])(add_knowledge_all)
 rag_bp.route('/remove', methods=['DELETE'])(remove_knowledge)
 rag_bp.route('/query', methods=['PUT'])(add_knowledge)
 rag_bp.route('/list', methods=['GET'])(get_list_knowledge)
-rag_bp.route('/demo', methods=['GET'])(demo)
