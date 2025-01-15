@@ -425,20 +425,6 @@
             </div>
         </div>
         <div class="answer-box">
-            <h3>RAG Local w Gemini Answer</h3>
-            <div class="answer-content" id="ragLocalGeminiAnswer">
-                The answer from RAG Local + Gemini will appear here...
-            </div>
-        </div>
-
-        <div class="answer-box">
-            <h3>RAG w GPT Answer</h3>
-            <div class="answer-content" id="gptGeminiAnswer">
-                The answer from RAG + GPT will appear here...
-            </div>
-        </div>
-
-        <div class="answer-box">
             <h3>GPT Only Answer</h3>
             <div class="answer-content" id="gptOnlyAnswer">
                 The answer from GPT only will appear here...
@@ -674,16 +660,12 @@
             // Make API calls for all three types
             Promise.all([
                 getAnswer('gemini'),
-                getAnswer('openai'),
                 getAnswer('openai_only'),
-                getAnswer('local')
             ])
-                .then(([geminiAnswer, gptAnswer, gptOnlyAnswer, localAnswer]) => {
+                .then(([geminiAnswer, gptOnlyAnswer]) => {
                     // Use marked to convert Markdown to HTML
                     document.getElementById('ragGeminiAnswer').innerHTML = marked.parse(geminiAnswer);
-                    document.getElementById('gptGeminiAnswer').innerHTML = marked.parse(gptAnswer);
                     document.getElementById('gptOnlyAnswer').innerHTML = marked.parse(gptOnlyAnswer);
-                    document.getElementById('ragLocalGeminiAnswer').innerHTML = marked.parse(localAnswer);
                 })
                 .finally(() => {
                     hideLoading();
