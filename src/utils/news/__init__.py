@@ -1,0 +1,1 @@
+from src.utils.news.get_news import get_news

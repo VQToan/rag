@@ -163,9 +163,8 @@ def add_knowledge():
     """
     try:
         subject, summary, content, provider = validate()
-        return add_knowledge_func(subject, summary, content, provider)
+        return add_knowledge_func(subject, content, provider,summary=summary)
     except Exception as e:
-        print(e)
         return {
             'isOK': False,
             'errorMessages': [
@@ -190,8 +189,6 @@ def validate():
         raise Exception('Please provide all the required fields : subject, content')
     if subject == '' or content == '':
         raise Exception('Please provide all the required fields : subject, content')
-    if summary == '' or summary is None:
-        summary = summarize_text(content)
     return subject, summary, content, provider
 
 
@@ -222,12 +219,13 @@ def summarize_text(text):
     return client(text)
 
 
-def add_knowledge_func(subject, summary, content, provider):
+def add_knowledge_func(subject, content, provider, summary=None, doc_guid=str(uuid.uuid4())):
     """
     Add knowledge to the database
     ---
     """
-    doc_guid = str(uuid.uuid4())
+    if summary == '' or summary is None:
+        summary = summarize_text(content)
     KNOWLEDGE_DB.update_category(
         {'docGuid': doc_guid},
         {

@@ -1,9 +1,12 @@
+import atexit
 import json
 
+from apscheduler.schedulers.background import BackgroundScheduler
+from elasticapm.contrib.flask import ElasticAPM
 from flasgger import Swagger
 from flask import Flask
-from elasticapm.contrib.flask import ElasticAPM
 
+from src.background_process.rabbit_mq_listener import process_rabbitmq_messages
 from src.config import logger
 from src.routes import rag_bp
 
@@ -18,7 +21,17 @@ app.config.from_object('src.config')
 # ============================================
 apm = ElasticAPM(app)
 
-
+# ============================================
+# Scheduler
+# ============================================
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=process_rabbitmq_messages,
+                  trigger="interval",
+                  seconds=3,  # Chạy mỗi 3 giây
+                  max_instances=2,  # Cho phép tối đa 2 phiên bản chạy đồng thời
+                  coalesce=True)
+scheduler.start()
+atexit.register(lambda: scheduler.shutdown())
 # ============================================
 # Swagger
 # ============================================
